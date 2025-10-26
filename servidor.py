@@ -2,7 +2,7 @@
 import socket
 import json
 import struct
-from datetime import datetime
+from datetime import datetime, timezone
 import threading
 import os
 
@@ -63,7 +63,7 @@ def handle_cliente(conn, addr):
                 msg = {
                     "author": username,
                     "message": payload["message"],
-                    "timestamp": datetime.utcnow().isoformat() + "Z"
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 mural.append(msg)
                 salvar_mural()

@@ -6,17 +6,13 @@ import tkinter as tk
 from tkinter import scrolledtext, messagebox
 
 
-# ----------------------- Funções de rede -----------------------
-
 def enviar_mensagem(sock, comando, payload):
-    """Envia uma mensagem com cabeçalho e JSON codificado."""
     payload_bytes = json.dumps(payload).encode('utf-8')
     cabecalho = struct.pack('>BBH', comando, 1, len(payload_bytes))
     sock.sendall(cabecalho + payload_bytes)
 
 
 def receber_mensagem(sock):
-    """Recebe mensagens do servidor (protocolo: cabeçalho + JSON)."""
     try:
         cabecalho = sock.recv(4)
         if not cabecalho:
@@ -29,13 +25,11 @@ def receber_mensagem(sock):
         return None, None
 
 
-# ----------------------- Classe principal -----------------------
-
 class ClienteMural:
     def __init__(self, root):
         self.root = root
         self.root.title("💬 Mural de Recados - Cliente")
-        self.root.geometry("600x520")
+        self.root.geometry("600x500")
 
         self.sock = None
         self.username = None
@@ -50,12 +44,11 @@ class ClienteMural:
 
         self.frame_login.pack(fill="both", expand=True)
 
-    # ----------------------- Tela de login -----------------------
 
     def criar_tela_login(self):
         tk.Label(self.frame_login, text="💬 Conectar ao Mural de Recados", font=("Arial", 14, "bold")).pack(pady=10)
 
-        # Campo para IP
+        # Campo para IP e Porta
         form_ip = tk.Frame(self.frame_login)
         form_ip.pack(pady=5)
         tk.Label(form_ip, text="Endereço IP:").grid(row=0, column=0, padx=5)
@@ -63,7 +56,6 @@ class ClienteMural:
         self.entry_ip.insert(0, "146.164.2.101")  # Valor padrão
         self.entry_ip.grid(row=0, column=1, padx=5)
 
-        # Campo para Porta
         tk.Label(form_ip, text="Porta:").grid(row=0, column=2, padx=5)
         self.entry_port = tk.Entry(form_ip, font=("Arial", 11), width=8)
         self.entry_port.insert(0, "50000")
@@ -78,7 +70,6 @@ class ClienteMural:
         self.btn_conectar = tk.Button(self.frame_login, text="Conectar", font=("Arial", 12), command=self.conectar_servidor)
         self.btn_conectar.pack(pady=10)
 
-    # ----------------------- Tela principal -----------------------
 
     def criar_tela_chat(self):
         tk.Label(self.frame_chat, text="💬 Mural de Mensagens", font=("Arial", 14, "bold")).pack(pady=10)
@@ -87,21 +78,18 @@ class ClienteMural:
         self.text_area.pack(padx=10, pady=5)
         self.text_area.config(state=tk.DISABLED)
 
+        # Campo de mensagem e botões
         form = tk.Frame(self.frame_chat)
         form.pack(pady=10)
-        tk.Label(form, text="Destinatário:").grid(row=0, column=0, padx=5)
-        self.entry_dest = tk.Entry(form, width=15)
-        self.entry_dest.grid(row=0, column=1, padx=5)
 
-        tk.Label(form, text="Mensagem:").grid(row=0, column=2, padx=5)
-        self.entry_msg = tk.Entry(form, width=30)
-        self.entry_msg.grid(row=0, column=3, padx=5)
+        tk.Label(form, text="Mensagem:").grid(row=0, column=0, padx=5)
+        self.entry_msg = tk.Entry(form, width=45)
+        self.entry_msg.grid(row=0, column=1, padx=5)
 
-        tk.Button(form, text="Enviar", command=self.enviar_msg).grid(row=0, column=4, padx=5)
+        tk.Button(form, text="Enviar", command=self.enviar_msg).grid(row=0, column=2, padx=5)
         tk.Button(self.frame_chat, text="📜 Ver histórico", command=self.pedir_historico).pack(pady=5)
         tk.Button(self.frame_chat, text="🚪 Sair", command=self.logout).pack(pady=5)
 
-    # ----------------------- Conexão -----------------------
 
     def conectar_servidor(self):
         self.username = self.entry_username.get().strip()
@@ -136,7 +124,6 @@ class ClienteMural:
         finally:
             self.btn_conectar.config(state=tk.NORMAL)
 
-    # ----------------------- Escuta do servidor -----------------------
 
     def escutar_servidor(self):
         while self.ativo[0]:
@@ -158,17 +145,14 @@ class ClienteMural:
                     self.adicionar_texto(f"[{m['author']}]: {m['message']}\n")
                 self.adicionar_texto("📜 --- Fim do histórico ---\n")
 
-    # ----------------------- Envio e logout -----------------------
 
     def enviar_msg(self):
         if not self.ativo[0]:
             return
         msg = self.entry_msg.get().strip()
-        dest = self.entry_dest.get().strip()
         if not msg:
             return
-        conteudo = msg if not dest else f"@{dest}: {msg}"
-        enviar_mensagem(self.sock, 2, {"message": conteudo})
+        enviar_mensagem(self.sock, 2, {"message": msg})
         self.entry_msg.delete(0, tk.END)
 
     def pedir_historico(self):
@@ -186,7 +170,6 @@ class ClienteMural:
             messagebox.showinfo("Logout", "Você saiu do mural.")
             self.root.destroy()
 
-    # ----------------------- Utilitários -----------------------
 
     def adicionar_texto(self, texto):
         """Adiciona texto na área de mensagens."""
@@ -195,8 +178,6 @@ class ClienteMural:
         self.text_area.yview(tk.END)
         self.text_area.config(state=tk.DISABLED)
 
-
-# ----------------------- Execução principal -----------------------
 
 if __name__ == "__main__":
     root = tk.Tk()

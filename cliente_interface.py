@@ -53,7 +53,7 @@ class ClienteMural:
         form_ip.pack(pady=5)
         tk.Label(form_ip, text="Endereço IP:").grid(row=0, column=0, padx=5)
         self.entry_ip = tk.Entry(form_ip, font=("Arial", 11), width=20)
-        self.entry_ip.insert(0, "146.164.2.101")  # Valor padrão
+        self.entry_ip.insert(0, "192.168.0.89")  # Valor padrão
         self.entry_ip.grid(row=0, column=1, padx=5)
 
         tk.Label(form_ip, text="Porta:").grid(row=0, column=2, padx=5)
